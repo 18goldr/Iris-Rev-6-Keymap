@@ -20,7 +20,10 @@
 #define ALT_L MT(MOD_RCTL, KC_L)
 #define GUI_SCLN MT(MOD_RSFT, KC_SCLN)
 
-#define ENT_NUM LT(_NUM, KC_ENT)
+#define REDO2 LCTL(KC_Y)
+
+#define ENT_FN LT(_FN, KC_ENT)
+#define SPC_NAV LT(_NAV, KC_SPC)
 
 enum custom_keycodes {
   QWERTY = SAFE_RANGE,
@@ -32,8 +35,43 @@ enum custom_keycodes {
   SETTINGS,
   GAMING,
   PREVWIN,
-  NEXTWIN
+  NEXTWIN,
+  REDO
 };
+
+// Tap Dance Code //
+
+typedef enum {
+    TD_NONE,
+    TD_UNKNOWN,
+    TD_SINGLE_HOLD,
+    TD_DOUBLE_HOLD
+} td_state_t;
+
+typedef struct {
+    bool is_press_action;
+    td_state_t state;
+} td_tap_t;
+
+// Tap Dance Declarations
+enum {
+    SYM_NUM_LAYER,
+    BSPC_DEL
+};
+
+// Function associated with all tap dances
+td_state_t cur_dance(qk_tap_dance_state_t *state);
+
+// Functions associated with individual tap dances
+void sym_num_finished(qk_tap_dance_state_t *state, void *user_data);
+void sym_num_reset(qk_tap_dance_state_t *state, void *user_data);
+
+// Associate our tap dance key with its functionality
+qk_tap_dance_action_t tap_dance_actions[] = {
+  [SYM_NUM_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, sym_num_finished, sym_num_reset, 275)
+};
+
+// End Tap Dance Code //
 
 bool is_alt_tab_active = false;
 uint16_t alt_tab_timer = 0;
@@ -41,24 +79,24 @@ uint16_t alt_tab_timer = 0;
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [_QWERTY] = LAYOUT(
-  //┌───────────────────────┬────────────────────┬───────────────────┬───────────────────┬───────────────────┬────────────┐                              ┌───────────┬───────────────────────┬───────────────────┬───────────────────┬──────────────────────┬─────────┐
-        KC_GRV,              KC_1,                     KC_2,                KC_3,            KC_4,              KC_5,                                          KC_6,            KC_7,               KC_8,                KC_9,               KC_0,              KC_ESC,
-  //├───────────────────────┼────────────────────┼───────────────────┼───────────────────┼───────────────────┼────────────┤                              ├───────────┼───────────────────────┼───────────────────┼───────────────────┼──────────────────────┼─────────┼
-     KC_LBRC,                  KC_Q,                     KC_W,              KC_E,            KC_R,              KC_T,                                          KC_Y,            KC_U,                KC_I,                KC_O,               KC_P,            KC_BSPC,
+  //┌───────────────────────┬────────────────────┬───────────────────┬───────────────────┬───────────────────┬────────────┐                              ┌───────────┬───────────────────────┬───────────────────┬───────────────────┬───────────────────────┬────────┐
+        KC_GRV,              KC_1,                     KC_2,                KC_3,            KC_4,              KC_5,                                          KC_6,            KC_7,               KC_8,                KC_9,               KC_0,             KC_ESC,
   //├───────────────────────┼────────────────────┼───────────────────┼───────────────────┼───────────────────┼────────────┤                              ├───────────┼───────────────────────┼───────────────────┼───────────────────┼───────────────────────┼────────┼
-     KC_LCBR,                  MT(MOD_LGUI, KC_A), MT(MOD_LALT, KC_S), MT(MOD_LCTL, KC_D), MT(MOD_LSFT, KC_F),  KC_G,                                          KC_H,      MT(MOD_RSFT, KC_J),  MT(MOD_RCTL, KC_K), MT(MOD_LALT, KC_L), MT(MOD_RGUI, KC_SCLN),  KC_QUOT,
+     KC_LBRC,                  KC_Q,                     KC_W,              KC_E,            KC_R,              KC_T,                                          KC_Y,            KC_U,                KC_I,                KC_O,               KC_P,          KC_BSPC,
+  //├───────────────────────┼────────────────────┼───────────────────┼───────────────────┼───────────────────┼────────────┤                              ├───────────┼───────────────────────┼───────────────────┼───────────────────┼───────────────────────┼────────┼
+     KC_LCBR,                  MT(MOD_LGUI, KC_A), MT(MOD_LALT, KC_S), MT(MOD_LCTL, KC_D), MT(MOD_LSFT, KC_F),  KC_G,                                          KC_H,      MT(MOD_RSFT, KC_J),  MT(MOD_RCTL, KC_K), MT(MOD_LALT, KC_L), MT(MOD_RGUI, KC_SCLN), KC_QUOT,
   //├───────────────────────┼────────────────────┼───────────────────┼───────────────────┼───────────────────┼────────────┼─────────┐           ┌────────┴───────────┼───────────────────────┼───────────────────┼───────────────────┼───────────────────────┼────────┼
      KC_TAB,                  KC_Z,                   KC_X,                 KC_C,                KC_V,          KC_B,      KC_MINUS,              KC_EQL,     KC_N,          KC_M,               KC_COMM,              KC_DOT,              KC_SLSH,          KC_BSLS,
   //└───────────────────────┴────────────────────┴───────────────────┴───────────────────┬───────────────────┴────────────┴─────────┘           └────────┴───────────┴───────────────────────┴───────────────────┴───────────────────┴───────────────────────┴────────┘
-                                                                                                MO(_FN),      MO(_SYMBOLS), ENT_NUM,              KC_SPC,  TT(_NAV),   TT(_MOUSE)
-                                               //                                        └───────────────────┴────────────┴─────────┘           └────────┴────────────┴──────────┘
+                                                                                               PREVWIN, TD(SYM_NUM_LAYER),  ENT_FN,              SPC_NAV,  TT(_MOUSE),   NEXTWIN
+                                               //                                        └──────────────┴─────────────────┴─────────┘           └────────┴────────────┴──────────┘
   ),
 
   [_SYMBOLS] = LAYOUT(
     //┌─────────────┬────────┬────────┬────────┬────────┬────────┐                          ┌────────┬────────┬────────┬────────┬────────┬────────┐
         _______,      _______, _______, _______, _______, _______,                      MO(_SETTINGS), _______, _______, _______, _______, _______,
     //├─────────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-       _______,      KC_HASH, KC_PIPE, KC_AMPR, KC_EXLM, _______,                            _______, KC_LBRC, KC_RBRC,  KC_LT,   KC_GT,   KC_DEL,
+       _______,      KC_HASH, KC_PIPE, KC_AMPR, KC_EXLM, _______,                            _______, KC_LBRC, KC_RBRC,  KC_LT,   KC_GT,  KC_DEL,
     //├─────────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
        KC_CAPS,      KC_MINS, KC_UNDS, KC_PLUS, KC_EQL,  KC_GRV,                             _______, KC_LCBR, KC_RCBR, KC_LPRN, KC_RPRN, _______,
     //├─────────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
@@ -72,11 +110,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     //┌──────────────┬────────┬────────┬────────┬────────┬────────┐                          ┌────────┬────────┬────────┬────────┬────────┬────────┐
         _______,       _______, KC_F10, KC_F11,  KC_F12,  _______,                       MO(_SETTINGS), _______, _______, _______, _______, _______,
     //├──────────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-        _______,       _______, KC_F7,   KC_F8,   KC_F9, _______,                             _______,   KC_7,    KC_8,    KC_9,  _______, _______,
+        _______,       _______, KC_F7,   KC_F8,   KC_F9, _______,                             _______,   KC_7,    KC_8,    KC_9,    KC_0,  _______,
     //├──────────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-        _______,       _______, KC_F4,   KC_F5,  KC_F6,   _______,                            _______,   KC_4,    KC_5,    KC_6,  _______, _______,
+        _______,       _______, KC_F4,   KC_F5,  KC_F6,   _______,                            KC_DOT,   KC_4,    KC_5,    KC_6,  _______, _______,
     //├──────────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
-        _______,       _______, KC_F1,  KC_F2,    KC_F3, _______, _______,          _______,    KC_0,    KC_1,    KC_2,    KC_3,  _______, _______,
+        _______,       _______, KC_F1,  KC_F2,    KC_F3, _______, _______,          _______,  KC_COMM,   KC_1,    KC_2,    KC_3,  _______, _______,
     //└──────────────┴────────┴────────┴────────┴───┬────────────┼─────────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
                                         _______,       _______,    _______,              _______, _______, _______
                                     // └────────────┴────────────┴─────────┘            └────────┴────────┴────────┘
@@ -84,9 +122,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 
 
-[_NAV] = LAYOUT(
+  [_NAV] = LAYOUT(
   //┌─────────────┬─────────────┬────────┬────────┬────────┬─────────────┐                          ┌────────────┬─────────┬────────┬──────────┬───────────────┬────────┐
-     _______,       _______,      _______, _______, _______, _______,                               MO(_SETTINGS),    _______, _______, _______,     _______,      _______,
+     _______,       _______,      _______, _______, _______, _______,                               MO(_SETTINGS), _______, _______, _______,     _______,      _______,
   //├─────────────┼─────────────┼────────┼────────┼────────┼─────────────┤                          ├────────────┼─────────┼────────┼──────────┼───────────────┼────────┤
      _______,      _______,       KC_WH_U,  KC_UP,  KC_WH_D, _______,                                  _______,    _______, KC_PGUP,  _______,     _______,      KC_DEL,
   //├─────────────┼─────────────┼────────┼────────┼────────┼─────────────┤                          ├────────────┼─────────┼────────┼──────────┼───────────────┼────────┤
@@ -114,13 +152,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [_FN] = LAYOUT(
     //┌────────┬────────┬───────────┬──────────┬────────────┬────────┐                          ┌────────┬────────┬────────┬────────┬────────┬───────────┐
-       _______,  _______, _______,    _______,    _______,    _______,                           _______, _______, _______, _______, _______, _______,
+       _______,  _______, _______,    _______,    _______,    _______,                      MO(_SETTINGS), _______, _______, _______, _______, _______,
     //├────────┼────────┼───────────┼──────────┼────────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼───────────┤
-       _______, _______, _______,     _______,    _______,    _______,                            _______,KC_VOLD, KC_VOLU, _______, _______, _______,
+       _______, _______, _______,     _______,    _______,    _______,                           _______, KC_VOLD, KC_VOLU, _______, _______,  _______,
     //├────────┼────────┼───────────┼──────────┼────────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼───────────┤
-       _______, _______, LCTL(KC_C), LCTL(KC_X), LCTL(KC_C), _______,                            _______, PREVWIN, NEXTWIN, _______, _______, _______,
+       _______, _______, LCTL(KC_C), LCTL(KC_X), LCTL(KC_V), _______,                            _______,LCTL(KC_Z), REDO,   REDO2,  _______,  _______,
     //├────────┼────────┼───────────┼──────────┼────────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼───────────┤
-       _______, _______, _______,     _______,    _______,    _______, _______,          _______, _______,KC_MSTP, KC_MPLY, _______, _______, _______,
+       _______, _______, _______,     _______,    _______,    _______, _______,          _______, _______,KC_MSTP, KC_MPLY, _______, _______,  _______,
     //└────────┴────────┴───────────┴─────┬────┴───────┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴───────────┘
                                               _______,  _______, _______,                   _______, _______, _______
                                        // └────────────┴────────┴────────┘                 └────────┴────────┴────────┘
@@ -141,7 +179,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                 // └────────┴────────┴────────┘                 └────────┴────────┴────────┘
   ),
 
-    [_GAMING] = LAYOUT(
+  [_GAMING] = LAYOUT(
     //┌────────┬────────┬────────┬────────┬────────┬────────┐                          ┌────────┬────────┬────────┬────────┬────────┬────────────┐
        _______,  _______, _______, _______, _______, _______,                            _______, _______, _______, _______, _______, TG(_GAMING),
     //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────────┤
@@ -160,7 +198,7 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
     case SFT_F:
     case SFT_J:
-      return TAPPING_TERM - 80;
+      return TAPPING_TERM - 30;
     case GUI_SCLN:
     case GUI_A:
       return TAPPING_TERM + 70;
@@ -265,6 +303,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         unregister_code16(S(KC_TAB));
       }
       break;
+
+    case REDO:
+      if (record->event.pressed) {
+        register_code16(S(LCTL(KC_Z)));
+      } else {
+        unregister_code16(S(LCTL(KC_Z)));
+      }
   }
   return true;
 }
@@ -275,5 +320,63 @@ void matrix_scan_user(void) {
       unregister_code(KC_LALT);
       is_alt_tab_active = false;
     }
+  }
+}
+
+// Determine the current tap dance state
+td_state_t cur_dance(qk_tap_dance_state_t *state) {
+  if (state->count == 1) {
+    return TD_SINGLE_HOLD;
+  } else if (state->count == 2) {
+    return TD_DOUBLE_HOLD;
+  }
+  else {
+    return TD_UNKNOWN;
+  }
+}
+
+// Initialize tap structure associated with example tap dance key
+static td_tap_t sym_num_tap_state = {
+  .is_press_action = true,
+  .state = TD_NONE
+};
+
+// Functions that control what our tap dance key does
+void sym_num_finished(qk_tap_dance_state_t *state, void *user_data) {
+  sym_num_tap_state.state = cur_dance(state);
+  switch (sym_num_tap_state.state) {
+    case TD_SINGLE_HOLD:
+      layer_on(_SYMBOLS);
+      break;
+    case TD_DOUBLE_HOLD:
+      layer_on(_NUM);
+      break;
+    default:
+      break;
+  }
+}
+
+void sym_num_reset(qk_tap_dance_state_t *state, void *user_data) {
+  // If the key was held down and now is released then switch off the layer
+  switch (sym_num_tap_state.state)
+  {
+    case TD_SINGLE_HOLD:
+      layer_off(_SYMBOLS);
+      break;
+    case TD_DOUBLE_HOLD:
+      layer_off(_NUM);
+      break;
+    default:
+      break;
+  }
+
+  sym_num_tap_state.state = TD_NONE;
+}
+
+
+void rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {   //RGB
+  if (host_keyboard_led_state().caps_lock) {                                 //caps lock backlight
+    rgb_matrix_set_color(25, RGB_WHITE);
+    rgb_matrix_set_color(12, RGB_WHITE);
   }
 }
