@@ -388,13 +388,13 @@ void rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {   /
     rgb_matrix_set_color(12, RGB_WHITE);
   }
 
-
   for (uint8_t i = led_min; i <= led_max; i++) {
     switch(get_highest_layer(layer_state|default_layer_state)) { //layers underglow
       case _NUM:
-        /*for (int j = 0; j < 15; ++j) {
-            rgb_matrix_set_color(backlightLEDall[j], colourNum[0], colourNum[1], colourNum[2]);
-        }*/
+        rgb_matrix_set_color_all(colourNum[0], colourNum[1], colourNum[2]);
+//        for (int j = 0; j < 15; ++j) {
+//            rgb_matrix_set_color(backlightLEDall[j], colourNum[0], colourNum[1], colourNum[2]);
+//        }
         for (int j = 0; j < 6; ++j) {
           rgb_matrix_set_color(underglowLED[j], colourNum[0], colourNum[1], colourNum[2]);
         }
