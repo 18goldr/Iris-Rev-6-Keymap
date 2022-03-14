@@ -55,8 +55,7 @@ typedef struct {
 
 // Tap Dance Declarations
 enum {
-    SYM_NUM_LAYER,
-    BSPC_DEL
+    SYM_NUM_LAYER
 };
 
 // Function associated with all tap dances
@@ -68,13 +67,22 @@ void sym_num_reset(qk_tap_dance_state_t *state, void *user_data);
 
 // Associate our tap dance key with its functionality
 qk_tap_dance_action_t tap_dance_actions[] = {
-  [SYM_NUM_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, sym_num_finished, sym_num_reset, 275)
+  [SYM_NUM_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, sym_num_finished, sym_num_reset)
 };
 
 // End Tap Dance Code //
 
 bool is_alt_tab_active = false;
 uint16_t alt_tab_timer = 0;
+
+
+uint8_t colourDefault[] = {57, 184, 255};   //default underglow colour
+uint8_t colourNum[] = {219, 76, 76};    //symbol layer underglow colour
+uint8_t colourSymbol[] = {54, 204, 31};       //numpad layer underglow colour
+
+int underglowLED[6] = {28, 29, 30, 31, 32, 33};
+int backlightLEDinner[15] = {6, 7, 8, 9, 10, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22};
+int backlightLEDall[28] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27};
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
@@ -378,5 +386,29 @@ void rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {   /
   if (host_keyboard_led_state().caps_lock) {                                 //caps lock backlight
     rgb_matrix_set_color(25, RGB_WHITE);
     rgb_matrix_set_color(12, RGB_WHITE);
+  }
+
+
+  for (uint8_t i = led_min; i <= led_max; i++) {
+    switch(get_highest_layer(layer_state|default_layer_state)) { //layers underglow
+      case _NUM:
+        /*for (int j = 0; j < 15; ++j) {
+            rgb_matrix_set_color(backlightLEDall[j], colourNum[0], colourNum[1], colourNum[2]);
+        }*/
+        for (int j = 0; j < 6; ++j) {
+          rgb_matrix_set_color(underglowLED[j], colourNum[0], colourNum[1], colourNum[2]);
+        }
+        break;
+      case _SYMBOLS:
+        for (int j = 0; j < 6; ++j) {
+          rgb_matrix_set_color(underglowLED[j], colourSymbol[0], colourSymbol[1], colourSymbol[2]);
+        }
+        break;
+      default:
+        for (int j = 0; j < 6; ++j) {
+          rgb_matrix_set_color(underglowLED[j], colourDefault[0], colourDefault[1], colourDefault[2]);
+        }
+        break;
+    }
   }
 }
