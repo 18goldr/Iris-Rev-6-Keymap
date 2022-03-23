@@ -22,7 +22,7 @@
 
 #define REDO2 LCTL(KC_Y)
 
-#define ENT_FN LT(_FN, KC_ENT)
+#define ENT_NUM LT(_NUM, KC_ENT)
 #define SPC_NAV LT(_NAV, KC_SPC)
 
 enum custom_keycodes {
@@ -55,19 +55,21 @@ typedef struct {
 
 // Tap Dance Declarations
 enum {
-    SYM_NUM_LAYER
+    SYM_FN_LAYER,
+    ESC_GAMING
 };
 
 // Function associated with all tap dances
 td_state_t cur_dance(qk_tap_dance_state_t *state);
 
 // Functions associated with individual tap dances
-void sym_num_finished(qk_tap_dance_state_t *state, void *user_data);
-void sym_num_reset(qk_tap_dance_state_t *state, void *user_data);
+void sym_fn_finished(qk_tap_dance_state_t *state, void *user_data);
+void sym_fn_reset(qk_tap_dance_state_t *state, void *user_data);
 
 // Associate our tap dance key with its functionality
 qk_tap_dance_action_t tap_dance_actions[] = {
-  [SYM_NUM_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, sym_num_finished, sym_num_reset)
+  [SYM_FN_LAYER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, sym_fn_finished, sym_fn_reset),
+  [ESC_GAMING] = ACTION_TAP_DANCE_DUAL_ROLE(KC_ESC, _GAMING)
 };
 
 // End Tap Dance Code //
@@ -79,6 +81,13 @@ uint16_t alt_tab_timer = 0;
 uint8_t colourDefault[] = {57, 184, 255};   //default underglow colour
 uint8_t colourNum[] = {219, 76, 76};    //symbol layer underglow colour
 uint8_t colourSymbol[] = {54, 204, 31};       //numpad layer underglow colour
+uint8_t colourNav[] = {0, 255, 0};       //nav layer underglow colour
+uint8_t colourGaming[] = {0, 0, 255};       //mouse layer underglow colour
+uint8_t colourFn[] = {141, 15, 166};       //fn layer underglow colour
+uint8_t colourSettings[] = {255, 255, 255};       //settings layer underglow colour
+uint8_t colourMouse[] = {255, 0, 0};       //gaming layer underglow colour
+
+
 
 int underglowLED[6] = {28, 29, 30, 31, 32, 33};
 int backlightLEDinner[15] = {6, 7, 8, 9, 10, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22};
@@ -96,7 +105,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //├───────────────────────┼────────────────────┼───────────────────┼───────────────────┼───────────────────┼────────────┼─────────┐           ┌────────┴───────────┼───────────────────────┼───────────────────┼───────────────────┼───────────────────────┼────────┼
      KC_TAB,                  KC_Z,                   KC_X,                 KC_C,                KC_V,          KC_B,      KC_MINUS,              KC_EQL,     KC_N,          KC_M,               KC_COMM,              KC_DOT,              KC_SLSH,          KC_BSLS,
   //└───────────────────────┴────────────────────┴───────────────────┴───────────────────┬───────────────────┴────────────┴─────────┘           └────────┴───────────┴───────────────────────┴───────────────────┴───────────────────┴───────────────────────┴────────┘
-                                                                                               PREVWIN, TD(SYM_NUM_LAYER),  ENT_FN,              SPC_NAV,  TT(_MOUSE),   NEXTWIN
+                                                                                               PREVWIN, TD(SYM_FN_LAYER),  ENT_NUM,              SPC_NAV,  TT(_MOUSE),   NEXTWIN
                                                //                                        └──────────────┴─────────────────┴─────────┘           └────────┴────────────┴──────────┘
   ),
 
@@ -118,11 +127,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     //┌──────────────┬────────┬────────┬────────┬────────┬────────┐                          ┌────────┬────────┬────────┬────────┬────────┬────────┐
         _______,       _______, KC_F10, KC_F11,  KC_F12,  _______,                       MO(_SETTINGS), _______, _______, _______, _______, _______,
     //├──────────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-        _______,       _______, KC_F7,   KC_F8,   KC_F9, _______,                             _______,   KC_7,    KC_8,    KC_9,    KC_0,  _______,
+        _______,       _______, KC_F7,   KC_F8,   KC_F9, _______,                             _______,   KC_7,    KC_8,    KC_9,  _______,  _______,
     //├──────────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-        _______,       _______, KC_F4,   KC_F5,  KC_F6,   _______,                            KC_DOT,   KC_4,    KC_5,    KC_6,  _______, _______,
+        _______,       _______, KC_F4,   KC_F5,  KC_F6,   _______,                            _______,   KC_4,    KC_5,    KC_6,  KC_DOT, _______,
     //├──────────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
-        _______,       _______, KC_F1,  KC_F2,    KC_F3, _______, _______,          _______,  KC_COMM,   KC_1,    KC_2,    KC_3,  _______, _______,
+        _______,       _______, KC_F1,  KC_F2,    KC_F3, _______, _______,          _______,  KC_0,      KC_1,    KC_2,    KC_3,  KC_COMM, _______,
     //└──────────────┴────────┴────────┴────────┴───┬────────────┼─────────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
                                         _______,       _______,    _______,              _______, _______, _______
                                     // └────────────┴────────────┴─────────┘            └────────┴────────┴────────┘
@@ -134,7 +143,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //┌─────────────┬─────────────┬────────┬────────┬────────┬─────────────┐                          ┌────────────┬─────────┬────────┬──────────┬───────────────┬────────┐
      _______,       _______,      _______, _______, _______, _______,                               MO(_SETTINGS), _______, _______, _______,     _______,      _______,
   //├─────────────┼─────────────┼────────┼────────┼────────┼─────────────┤                          ├────────────┼─────────┼────────┼──────────┼───────────────┼────────┤
-     _______,      _______,       KC_WH_U,  KC_UP,  KC_WH_D, _______,                                  _______,    _______, KC_PGUP,  _______,     _______,      KC_DEL,
+     _______,      _______,       KC_WH_U,  KC_UP,  KC_WH_D, _______,                                  _______,    _______, KC_PGUP,  _______,     _______,     _______,
   //├─────────────┼─────────────┼────────┼────────┼────────┼─────────────┤                          ├────────────┼─────────┼────────┼──────────┼───────────────┼────────┤
      _______,      LCTL(KC_LEFT),KC_LEFT, KC_DOWN, KC_RIGHT,LCTL(KC_RIGHT),                           _______,    KC_HOME,  KC_PGDN, KC_END,     _______,       _______,
   //├─────────────┼─────────────┼────────┼────────┼────────┼─────────────┼────────┐        ┌────────┼────────────┼─────────┼────────┼──────────┼───────────────┼────────┤
@@ -162,9 +171,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     //┌────────┬────────┬───────────┬──────────┬────────────┬────────┐                          ┌────────┬────────┬────────┬────────┬────────┬───────────┐
        _______,  _______, _______,    _______,    _______,    _______,                      MO(_SETTINGS), _______, _______, _______, _______, _______,
     //├────────┼────────┼───────────┼──────────┼────────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼───────────┤
-       _______, _______, _______,     _______,    _______,    _______,                           _______, KC_VOLD, KC_VOLU, _______, _______,  _______,
+       _______, _______, LCTL(KC_Z),    REDO,       REDO2,    _______,                           _______, KC_VOLD, KC_VOLU, _______, _______,  _______,
     //├────────┼────────┼───────────┼──────────┼────────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼───────────┤
-       _______, _______, LCTL(KC_C), LCTL(KC_X), LCTL(KC_V), _______,                            _______,LCTL(KC_Z), REDO,   REDO2,  _______,  _______,
+       _______, _______, LCTL(KC_C), LCTL(KC_X), LCTL(KC_V), _______,                            _______, _______, _______, _______,  _______,  _______,
     //├────────┼────────┼───────────┼──────────┼────────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼───────────┤
        _______, _______, _______,     _______,    _______,    _______, _______,          _______, _______,KC_MSTP, KC_MPLY, _______, _______,  _______,
     //└────────┴────────┴───────────┴─────┬────┴───────┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴───────────┘
@@ -189,15 +198,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [_GAMING] = LAYOUT(
     //┌────────┬────────┬────────┬────────┬────────┬────────┐                          ┌────────┬────────┬────────┬────────┬────────┬────────────┐
-       _______,  _______, _______, _______, _______, _______,                            _______, _______, _______, _______, _______, TG(_GAMING),
+       _______,  _______, _______, _______, _______, _______,                            _______, _______, _______, _______, _______,TD(ESC_GAMING),
     //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────────┤
-       _______, _______, _______, _______, _______, _______,                            _______, _______, _______, _______, _______, _______,
+       MOD_LALT, _______, _______, _______, _______, _______,                            _______, _______, _______, _______, _______, _______,
     //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────────┤
-       _______,   KC_A,    KC_S,    KC_D,    KC_F,  _______,                            _______,   KC_J,    KC_K,    KC_L,  KC_SCLN, _______,
+       MOD_LSHFT, KC_A,    KC_S,    KC_D,    KC_F,  _______,                            _______,   KC_J,    KC_K,    KC_L,  KC_SCLN,   KC_ENT,
     //├────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────────┤
-       _______, _______, _______, _______, _______, _______, _______,          _______, _______, _______, _______, _______, _______, _______,
+       MOD_LCTL, _______, _______, _______, _______, _______, _______,          _______, _______, _______, _______, _______, _______, _______,
     //└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────────┘
-                                      _______, _______,_______,                   _______, _______,  _______
+                                      _______,  KC_NO,  KC_SPC,                    KC_SPC,   KC_NO,  _______
     //                               └────────┴────────┴────────┘                 └────────┴────────┴────────┘
     ),
 };
@@ -210,6 +219,8 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     case GUI_SCLN:
     case GUI_A:
       return TAPPING_TERM + 70;
+    case TD(SYM_FN_LAYER):
+      return TAPPING_TERM * 3;
     default:
       return TAPPING_TERM;
   }
@@ -344,29 +355,29 @@ td_state_t cur_dance(qk_tap_dance_state_t *state) {
 }
 
 // Initialize tap structure associated with example tap dance key
-static td_tap_t sym_num_tap_state = {
+static td_tap_t sym_fn_tap_state = {
   .is_press_action = true,
   .state = TD_NONE
 };
 
 // Functions that control what our tap dance key does
-void sym_num_finished(qk_tap_dance_state_t *state, void *user_data) {
-  sym_num_tap_state.state = cur_dance(state);
-  switch (sym_num_tap_state.state) {
+void sym_fn_finished(qk_tap_dance_state_t *state, void *user_data) {
+  sym_fn_tap_state.state = cur_dance(state);
+  switch (sym_fn_tap_state.state) {
     case TD_SINGLE_HOLD:
       layer_on(_SYMBOLS);
       break;
     case TD_DOUBLE_HOLD:
-      layer_on(_NUM);
+      layer_on(_FN);
       break;
     default:
       break;
   }
 }
 
-void sym_num_reset(qk_tap_dance_state_t *state, void *user_data) {
+void sym_fn_reset(qk_tap_dance_state_t *state, void *user_data) {
   // If the key was held down and now is released then switch off the layer
-  switch (sym_num_tap_state.state)
+  switch (sym_fn_tap_state.state)
   {
     case TD_SINGLE_HOLD:
       layer_off(_SYMBOLS);
@@ -378,36 +389,50 @@ void sym_num_reset(qk_tap_dance_state_t *state, void *user_data) {
       break;
   }
 
-  sym_num_tap_state.state = TD_NONE;
+  sym_fn_tap_state.state = TD_NONE;
 }
 
+void set_backlight(uint8_t colours[3])
+{
+  for (int i = 0; i < 6; i++) {
+    rgb_matrix_set_color(underglowLED[i], colours[0], colours[1], colours[2]);
+  }
+}
 
 void rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {   //RGB
   if (host_keyboard_led_state().caps_lock) {                                 //caps lock backlight
-    rgb_matrix_set_color(25, RGB_WHITE);
-    rgb_matrix_set_color(12, RGB_WHITE);
+    rgb_matrix_set_color(25, RGB_RED); // TODO this looks sick if you do red here with blue backlight
+    rgb_matrix_set_color(12, RGB_RED);
   }
-
 
   for (uint8_t i = led_min; i <= led_max; i++) {
     switch(get_highest_layer(layer_state|default_layer_state)) { //layers underglow
       case _NUM:
-        /*for (int j = 0; j < 15; ++j) {
-            rgb_matrix_set_color(backlightLEDall[j], colourNum[0], colourNum[1], colourNum[2]);
-        }*/
-        for (int j = 0; j < 6; ++j) {
-          rgb_matrix_set_color(underglowLED[j], colourNum[0], colourNum[1], colourNum[2]);
-        }
+//        for (int j = 0; j < 28; ++j) {
+//          rgb_matrix_set_color(backlightLEDall[j], colourNum[0], colourNum[1], colourNum[2]);
+//        }
+        set_backlight(colourNum);
         break;
       case _SYMBOLS:
-        for (int j = 0; j < 6; ++j) {
-          rgb_matrix_set_color(underglowLED[j], colourSymbol[0], colourSymbol[1], colourSymbol[2]);
-        }
+        set_backlight(colourSymbol);
+        break;
+      case _MOUSE:
+        set_backlight(colourMouse);
+        break;
+      case _NAV:
+        set_backlight(colourNav);
+        break;
+      case _FN:
+        set_backlight(colourFn);
+        break;
+      case _SETTINGS:
+        set_backlight(colourSettings);
+        break;
+      case _GAMING:
+        set_backlight(colourGaming);
         break;
       default:
-        for (int j = 0; j < 6; ++j) {
-          rgb_matrix_set_color(underglowLED[j], colourDefault[0], colourDefault[1], colourDefault[2]);
-        }
+        set_backlight(colourDefault);
         break;
     }
   }
