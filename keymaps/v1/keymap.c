@@ -383,7 +383,7 @@ void sym_fn_reset(qk_tap_dance_state_t *state, void *user_data) {
       layer_off(_SYMBOLS);
       break;
     case TD_DOUBLE_HOLD:
-      layer_off(_NUM);
+      layer_off(_FN);
       break;
     default:
       break;
