@@ -1,6 +1,7 @@
 # ignore everything
-/*
-
-!.gitignore
-!keymaps/v1/keymap.c
-!rev6/rules.mk
+*.idea
+#/*
+#
+#!.gitignore
+#!keymaps/v1/keymap.c
+#!rev6/rules.mk
